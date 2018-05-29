@@ -331,6 +331,8 @@ public final class V8JavaObjectUtils {
             V8JavaAdapter.getCacheForRuntime(v8).removeGarbageCollectedJavaObjects();
         }
 
+        V8JavaAdapter.releaseV8RelatedResources(v8);
+
         return released;
     }
 
@@ -348,7 +350,7 @@ public final class V8JavaObjectUtils {
             if (isBasicallyPrimitive(javaArgument)) {
                 return javaArgument;
             } else {
-                final JavaToJsTransformation transformation = V8JavaAdapter.getCustomJsTransformation(javaArgument);
+                final JavaToJsTransformation transformation = V8JavaAdapter.getCustomJsTransformation(v8, javaArgument);
                 if (transformation == null) {
                     String key = cache.v8ObjectToIdentifierMap.get(javaArgument);
                     if (key != null) {
@@ -360,7 +362,7 @@ public final class V8JavaObjectUtils {
                         return v8.get(key);
                     }
                 } else {
-                    return transformation.transform(javaArgument);
+                    return transformation.transform(v8, javaArgument);
                 }
             }
         }

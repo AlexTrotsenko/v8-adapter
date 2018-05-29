@@ -793,16 +793,16 @@ public class V8JavaAdapterTest {
         Assert.assertEquals(list1stElement, holder.get());
 
         //use custom transformation behaviour
-        V8JavaAdapter.setJsTransformation(Map.class, new JavaToJsTransformation<Map>() {
+        V8JavaAdapter.setJsTransformation(v8, Map.class, new JavaToJsTransformation<Map>() {
             @Override
-            public V8Object transform(Map javaObject) {
+            public V8Object transform(V8 v8, Map javaObject) {
                 //TODO: Implement v8-adapter's variant of V8ObjectUtils.toV8Object(), which handles conversion of random objects.
                 return V8ObjectUtils.toV8Object(v8, javaObject);
             }
         });
-        V8JavaAdapter.setJsTransformation(List.class, new JavaToJsTransformation<List>() {
+        V8JavaAdapter.setJsTransformation(v8, List.class, new JavaToJsTransformation<List>() {
             @Override
-            public V8Object transform(List javaObject) {
+            public V8Object transform(V8 v8, List javaObject) {
                 //TODO: Implement v8-adapter's variant of V8ObjectUtils.toV8Array(), which handles conversion of random objects.
                 return V8ObjectUtils.toV8Array(v8, javaObject);
             }

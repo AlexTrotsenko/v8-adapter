@@ -17,7 +17,7 @@ public final class V8JavaAdapter {
     /***
      * Set-up is global, but not per-v8 instance for simplicity.
      */
-    private static final Map <Class<?>, JavaToJsTransformation> customJsTransformations = new HashMap<Class<?>, JavaToJsTransformation>();
+    private static final Map<V8, Map<Class, JavaToJsTransformation>> perV8CustomJsTransformations = new HashMap<V8, Map<Class, JavaToJsTransformation>>();
 
     /**
      * Returns the {@link V8JavaCache} associated with a given runtime.
@@ -41,12 +41,21 @@ public final class V8JavaAdapter {
     /**
      * @return custom transformation if any matching object's class or null otherwise.
      */
-    static JavaToJsTransformation getCustomJsTransformation(Object javaObjectToTransform) {
-        for (Map.Entry<Class<?>, JavaToJsTransformation> classToTransformation : customJsTransformations.entrySet()) {
-            if (classToTransformation.getKey().isInstance(javaObjectToTransform)) return classToTransformation.getValue();
+    static JavaToJsTransformation getCustomJsTransformation(V8 v8, Object javaObjectToTransform) {
+        final Map<Class, JavaToJsTransformation> customJsTransformations = perV8CustomJsTransformations.get(v8);
+        if (customJsTransformations == null) return null;
+
+        for (Map.Entry<Class, JavaToJsTransformation> entry : customJsTransformations.entrySet()) {
+            if (entry.getKey().isInstance(javaObjectToTransform)) return entry.getValue();
         }
 
         return null;
+    }
+
+
+    public static void releaseV8RelatedResources(V8 v8) {
+        runtimeToCacheMap.remove(v8);
+        perV8CustomJsTransformations.remove(v8);
     }
 
     /**
@@ -197,7 +206,11 @@ public final class V8JavaAdapter {
      * Set Custom transformation for classes where other the default result is expected, e.g. Java List to JS Array, etc.
      * By default Java object "exported" to JS runtime as js object with same set of the methods.
      */
-    public static <T> void setJsTransformation(Class<T> classy, JavaToJsTransformation<T> transformation) {
+    public static <T> void setJsTransformation(V8 v8, Class<T> classy, JavaToJsTransformation<T> transformation) {
+        if (!perV8CustomJsTransformations.containsKey(v8)) {
+            perV8CustomJsTransformations.put(v8, new HashMap<Class, JavaToJsTransformation>());
+        }
+        Map<Class, JavaToJsTransformation> customJsTransformations = perV8CustomJsTransformations.get(v8);
         customJsTransformations.put(classy, transformation);
     }
 }
