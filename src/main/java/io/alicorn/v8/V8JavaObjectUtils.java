@@ -954,7 +954,8 @@ public final class V8JavaObjectUtils {
 
         // Typical handling. Argument lengths must match exactly; Java does
         // not consistently support random null values being passed in to core libraries.
-        } else if (javaArgumentTypes.length == javascriptArguments.length()) {
+        //todo do NOT merge this to the master (testing purpouses only)
+        } else if (javaArgumentTypes.length >= javascriptArguments.length()) {
             Object[] returnedArgumentValues = new Object[javaArgumentTypes.length];
 
             for (int i = 0; i < javascriptArguments.length(); i++) {
@@ -968,6 +969,12 @@ public final class V8JavaObjectUtils {
                         ((V8Value) argument).release();
                     }
                 }
+            }
+
+            //todo do NOT merge this to the master (testing purpouses only)
+            //all the params in the JS are optional and undefined is passed as
+            for (int i = javascriptArguments.length(); i < javaArgumentTypes.length; i++) {
+                returnedArgumentValues[i] = nullOrThrowOnPrimitive(javaArgumentTypes[i]);
             }
 
             return returnedArgumentValues;
